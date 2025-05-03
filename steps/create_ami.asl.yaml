@@ -1,0 +1,12 @@
+Comment: "AMIを作成するステップ"
+StartAt: CreateImage
+States:
+  CreateImage:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:createImage"
+    Parameters:
+      InstanceId.$: "$.InstanceId"
+      Name.$: States.Format('{}_{}', $.AMIPrefix, States.Format('{}', $$.Execution.StartTime))
+      NoReboot: true
+    ResultPath: "$.NewAMI"
+    End: true

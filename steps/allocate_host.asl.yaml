@@ -1,0 +1,13 @@
+Comment: "EC2専有ホストを割り当てるステップ"
+StartAt: AllocateHost
+States:
+  AllocateHost:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:allocateHosts"
+    Parameters:
+      AvailabilityZone.$: "$.SubnetAZ"
+      InstanceType.$: "$.InstanceType"
+      AutoPlacement: "on"
+      Quantity: 1
+    ResultPath: "$.HostAllocation"
+    End: true

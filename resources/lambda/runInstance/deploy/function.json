@@ -1,0 +1,18 @@
+{
+  "FunctionName": "runInstance",
+  "Description": "指定したEC2専有ホスト上にAmazon Linux 2023インスタンスを起動するLambda関数 (nodejs22.x/arm64) - gp3ボリューム/セキュリティグループ自動適用",
+  "Handler": "dist/index.handler",
+  "Role": "arn:aws:iam::965128939651:role/DedicatedHostLambdaRole",
+  "Runtime": "nodejs22.x",
+  "MemorySize": 256,
+  "Timeout": 60,
+  "Architectures": ["arm64"],
+  "Environment": {
+    "Variables": {
+      "LOG_LEVEL": "info"
+    }
+  },
+  "Tags": {
+    "Project": "dedicated-host-ctl"
+  }
+}

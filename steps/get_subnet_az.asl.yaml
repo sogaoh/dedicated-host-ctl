@@ -1,0 +1,13 @@
+Comment: "サブネットからAZ情報を取得するステップ"
+StartAt: GetSubnetAZ
+States:
+  GetSubnetAZ:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:describeSubnets"
+    Parameters:
+      SubnetIds:
+        - "$.Subnet"
+    ResultSelector:
+      SubnetAZ.$: "$.Subnets[0].AvailabilityZone"
+    ResultPath: "$.SubnetDetails"
+    End: true

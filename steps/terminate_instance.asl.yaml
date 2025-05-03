@@ -1,0 +1,10 @@
+Comment: "EC2インスタンスを終了するステップ"
+StartAt: TerminateInstance
+States:
+  TerminateInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:terminateInstances"
+    Parameters:
+      InstanceIds:
+        - "$.InstanceId"
+    End: true

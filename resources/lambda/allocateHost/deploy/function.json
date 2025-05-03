@@ -1,0 +1,18 @@
+{
+  "FunctionName": "allocateHost",
+  "Description": "EC2専有ホストを割り当てるLambda関数",
+  "Handler": "dist/index.handler",
+  "Role": "arn:aws:iam::965128939651:role/DedicatedHostLambdaRole",
+  "Runtime": "nodejs22.x",
+  "MemorySize": 256,
+  "Timeout": 60,
+  "Architectures": ["arm64"],
+  "Environment": {
+    "Variables": {
+      "LOG_LEVEL": "info"
+    }
+  },
+  "Tags": {
+    "Project": "dedicated-host-ctl"
+  }
+}

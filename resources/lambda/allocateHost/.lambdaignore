@@ -1,0 +1,10 @@
+*.ts
+*.md
+*.map
+src/
+test/
+node_modules/
+package*.json
+build.js
+tsconfig.json
+bun.lock

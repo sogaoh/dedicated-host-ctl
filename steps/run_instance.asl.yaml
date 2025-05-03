@@ -1,0 +1,28 @@
+Comment: "EC2インスタンスを起動するステップ"
+StartAt: RunInstance
+States:
+  RunInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:runInstances"
+    Parameters:
+      ImageId.$: "$.AMIDetails.Parameter.Value"
+      InstanceType.$: "$.InstanceType"
+      MinCount: 1
+      MaxCount: 1
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          Groups.$: "$.SecurityGroups"
+          SubnetId.$: "$.Subnet"
+      Placement:
+        HostId.$: "$.HostAllocation.HostIds[0]"
+      IamInstanceProfile:
+        Name.$: "$.InstanceProfile"
+      TagSpecifications:
+        - ResourceType: "instance"
+          Tags:
+            - Key: "Name"
+              Value: "Dedicated_Host_Instance"
+            - Key: "OnDedicatedHost"
+              Value: "true"
+    ResultPath: "$.InstanceDetails"
+    End: true

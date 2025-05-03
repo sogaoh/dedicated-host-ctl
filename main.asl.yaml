@@ -1,0 +1,114 @@
+Comment: "EC2専有ホストの起動停止ワークフロー"
+StartAt: StartOrStop
+States:
+  StartOrStop:
+    Type: Choice
+    Choices:
+      - Variable: "$.action"
+        StringEquals: "start"
+        Next: AllocateHost
+      - Variable: "$.action"
+        StringEquals: "stop"
+        Next: StopInstance
+    Default: Fail
+  
+  # 起動フロー
+  AllocateHost:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:allocateHosts"
+    Parameters:
+      AvailabilityZone.$: "$.SubnetAZ"
+      InstanceType.$: "$.InstanceType"
+      AutoPlacement: "on"
+      Quantity: 1
+    ResultPath: "$.HostAllocation"
+    Next: GetLatestAMI
+  
+  GetLatestAMI:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ssm:getParameter"
+    Parameters:
+      Name.$: "$.AMIPrefix"
+    ResultPath: "$.AMIDetails"
+    Next: RunInstance
+  
+  RunInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:runInstances"
+    Parameters:
+      ImageId.$: "$.AMIDetails.Parameter.Value"
+      InstanceType.$: "$.InstanceType"
+      MinCount: 1
+      MaxCount: 1
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          Groups.$: "$.SecurityGroups"
+          SubnetId.$: "$.Subnet"
+      Placement:
+        HostId.$: "$.HostAllocation.HostIds[0]"
+      IamInstanceProfile:
+        Name.$: "$.InstanceProfile"
+    ResultPath: "$.InstanceDetails"
+    Next: UpdateInstanceTags
+
+  UpdateInstanceTags:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:createTags"
+    Parameters:
+      Resources.$: "States.Array($.InstanceDetails.Instances[0].InstanceId)"
+      Tags:
+        - Key: "Name"
+          Value.$: "States.Format('Dedicated_{}_{}', $.HostAllocation.HostIds[0], $.InstanceDetails.Instances[0].InstanceId)"
+    ResultPath: "$.TagResult"
+    Next: FormatOutput
+
+  FormatOutput:
+    Type: Pass
+    Parameters:
+      HostId.$: "$.HostAllocation.HostIds[0]"
+      InstanceId.$: "$.InstanceDetails.Instances[0].InstanceId"
+    End: true
+
+
+
+  # 停止フロー
+  StopInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:stopInstances"
+    Parameters:
+      InstanceIds.$: "States.Array($.InstanceId)"
+    ResultPath: "$.StopResult"
+    OutputPath: "$"
+    Next: CreateImage
+
+  CreateImage:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:createImage"
+    Parameters:
+      InstanceId.$: "$.StoppingInstances[0].InstanceId"
+      Name.$: "States.Format('ami-backup-{}', $.StoppingInstances[0].InstanceId)"
+      NoReboot: true
+    ResultPath: "$.NewAMI"
+    OutputPath: "$"
+    Next: TerminateInstance
+
+  TerminateInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:terminateInstances"
+    Parameters:
+      InstanceIds.$: "States.Array($.StoppingInstances[0].InstanceId)"
+    ResultPath: "$.TerminateResult"
+    OutputPath: "$"
+    Next: ReleaseHost
+
+  ReleaseHost:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:releaseHosts"
+    Parameters:
+      HostIds.$: "States.Array($.HostId)"
+    End: true
+
+  Fail:
+    Type: Fail
+    Error: "InvalidAction"
+    Cause: "アクションはstartまたはstopを指定してください"

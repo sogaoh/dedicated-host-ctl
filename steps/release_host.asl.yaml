@@ -1,0 +1,10 @@
+Comment: "専有ホストを解放するステップ"
+StartAt: ReleaseHost
+States:
+  ReleaseHost:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:releaseHosts"
+    Parameters:
+      HostIds:
+        - "$.HostId"
+    End: true

@@ -1,0 +1,6 @@
+bun.lock
+package-lock.json
+dist
+function.zip
+*.js
+!jest.config.js

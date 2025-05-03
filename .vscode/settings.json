@@ -1,0 +1,14 @@
+{
+    "window.title": "${dirty}${activeEditorLong}${separator}${rootName}",
+    "editor.rulers": [
+      120
+    ], // 1行120文字のルールのために補助線を引く
+    "editor.tabSize": 2, // タブサイズ2のルール
+    "editor.renderWhitespace": "all", // 半角空白を・で表示
+    "editor.bracketPairColorization.enabled": true, // 括弧の対応を色付け
+    //"files.insertFinalNewline": true, // 保存時にファイルの最後に空行を挿入する
+    "files.trimFinalNewlines": true, // 保存時にファイルの最後に存在する空行を削除する
+    //"files.trimTrailingWhitespace": true, // 保存時に行の終端に存在する空白文字を削除する
+    "cSpell.words": [
+    ]
+}

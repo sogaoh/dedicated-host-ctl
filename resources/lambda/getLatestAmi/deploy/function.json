@@ -1,0 +1,18 @@
+{
+  "FunctionName": "getLatestAmi",
+  "Description": "EC2専有ホスト用の最新Amazon Linux 2023 AMIを取得するLambda関数 (nodejs22.x/arm64) - HVM/SSD/gp3フィルタ適用",
+  "Handler": "dist/index.handler",
+  "Role": "arn:aws:iam::965128939651:role/DedicatedHostLambdaRole",
+  "Runtime": "nodejs22.x",
+  "MemorySize": 256,
+  "Timeout": 60,
+  "Architectures": ["arm64"],
+  "Environment": {
+    "Variables": {
+      "LOG_LEVEL": "info"
+    }
+  },
+  "Tags": {
+    "Project": "dedicated-host-ctl"
+  }
+}

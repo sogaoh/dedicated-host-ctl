@@ -1,0 +1,9 @@
+Comment: "EC2インスタンスを停止するステップ"
+StartAt: StopInstance
+States:
+  StopInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:stopInstances"
+    Parameters:
+      InstanceIds.$: "States.Array($.InstanceId)"
+    End: true

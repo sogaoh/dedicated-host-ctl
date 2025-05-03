@@ -1,0 +1,10 @@
+Comment: "最新AMIを取得するステップ"
+StartAt: GetLatestAMI
+States:
+  GetLatestAMI:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ssm:getParameter"
+    Parameters:
+      Name.$: "$.AMIPrefix"
+    ResultPath: "$.AMIDetails"
+    End: true

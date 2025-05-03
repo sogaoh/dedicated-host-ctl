@@ -1,0 +1,92 @@
+Comment: "EC2専有ホスト管理の各ステップのユニットテスト"
+StartAt: SelectTestCase
+States:
+  SelectTestCase:
+    Type: Choice
+    Choices:
+      - Variable: "$.testCase"
+        StringEquals: "allocate_host"
+        Next: TestAllocateHost
+      - Variable: "$.testCase"
+        StringEquals: "get_latest_ami"
+        Next: TestGetLatestAmi
+      - Variable: "$.testCase"
+        StringEquals: "run_instance"
+        Next: TestRunInstance
+      - Variable: "$.testCase"
+        StringEquals: "create_ami"
+        Next: TestCreateAmi
+      - Variable: "$.testCase"
+        StringEquals: "terminate_instance"
+        Next: TestTerminateInstance
+      - Variable: "$.testCase"
+        StringEquals: "release_host"
+        Next: TestReleaseHost
+    Default: InvalidTestCase
+
+  # 各テストケース
+  TestAllocateHost:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:allocateHosts.waitForTaskToken"
+    Parameters:
+      AvailabilityZone.$: "$.SubnetAZ"
+      InstanceType.$: "$.InstanceType"
+      AutoPlacement: "on"
+      Quantity: 1
+      TaskToken.$: "$$.Task.Token"
+    End: true
+
+  TestGetLatestAmi:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ssm:getParameter.waitForTaskToken"
+    Parameters:
+      Name.$: "$.AMIPrefix"
+      TaskToken.$: "$$.Task.Token"
+    End: true
+
+  TestRunInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:runInstances.waitForTaskToken"
+    Parameters:
+      ImageId.$: "$.AMI"
+      InstanceType.$: "$.InstanceType"
+      NetworkInterfaces:
+        - Groups.$: "$.SecurityGroups"
+          SubnetId.$: "$.Subnet"
+      Placement:
+        HostId.$: "$.HostId"
+      TaskToken.$: "$$.Task.Token"
+    End: true
+
+  TestCreateAmi:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:createImage.waitForTaskToken"
+    Parameters:
+      InstanceId.$: "$.InstanceId"
+      Name.$: "$.AMIPrefix"
+      NoReboot: true
+      TaskToken.$: "$$.Task.Token"
+    End: true
+
+  TestTerminateInstance:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:terminateInstances.waitForTaskToken"
+    Parameters:
+      InstanceIds:
+        - "$.InstanceId"
+      TaskToken.$: "$$.Task.Token"
+    End: true
+
+  TestReleaseHost:
+    Type: Task
+    Resource: "arn:aws:states:::aws-sdk:ec2:releaseHosts.waitForTaskToken"
+    Parameters:
+      HostIds:
+        - "$.HostId"
+      TaskToken.$: "$$.Task.Token"
+    End: true
+
+  InvalidTestCase:
+    Type: Fail
+    Error: "InvalidTestCase"
+    Cause: "指定されたテストケースが見つかりません"
