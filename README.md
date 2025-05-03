@@ -176,6 +176,22 @@ make deploy
 
 ### Dedicated Host Control
 
+```zsh
+cd /path/to/dedicated-host-ctl
+```
+
+#### Create state-machine
+
+```zsh
+aws stepfunctions create-state-machine \
+  --name DedicatedHostCtl \
+  --definition file://main.asl.json \
+  --role-arn arn:aws:iam::<your_account_id>:role/StepFunctionsExecutionRole \
+  --region ap-northeast-1 \
+  --profile <your_profile>
+```
+
+
 #### Start
 
 ```zsh
@@ -262,7 +278,7 @@ bun test
 ### Update state-machine
 
 ```zsh
-cd /path/to/root
+cd /path/to/dedicated-host-ctl
 ```
 
 ```zsh
