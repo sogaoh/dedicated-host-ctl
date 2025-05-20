@@ -85,8 +85,8 @@ States:
     Type: Task
     Resource: "arn:aws:states:::aws-sdk:ec2:createImage"
     Parameters:
-      InstanceId.$: "$.StoppingInstances[0].InstanceId"
-      Name.$: "States.Format('ami-backup-{}', $.StoppingInstances[0].InstanceId)"
+      InstanceId.$: "$.StopResult.StoppingInstances[0].InstanceId"
+      Name.$: "States.Format('ami-backup-{}', $.StopResult.StoppingInstances[0].InstanceId)"
       NoReboot: true
     ResultPath: "$.NewAMI"
     OutputPath: "$"
@@ -96,7 +96,7 @@ States:
     Type: Task
     Resource: "arn:aws:states:::aws-sdk:ec2:terminateInstances"
     Parameters:
-      InstanceIds.$: "States.Array($.StoppingInstances[0].InstanceId)"
+      InstanceIds.$: "States.Array($.StopResult.StoppingInstances[0].InstanceId)"
     ResultPath: "$.TerminateResult"
     OutputPath: "$"
     Next: ReleaseHost
